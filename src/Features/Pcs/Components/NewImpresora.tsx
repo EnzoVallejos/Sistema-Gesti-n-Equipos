@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, 
   TextField, 
   Button, 
   Typography, 
   Container,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl
 } from '@mui/material';
 import { FetchApi } from '../../../Api/useAxios';
 import { useAuth } from '../../../Context/useAuth';
@@ -23,6 +27,31 @@ const NewImpresora: React.FC = () => {
     oficinaId: 0
   });
 
+  const [oficinas, setOficinas] = useState<{ oficinaId: number; nombre: string }[]>([]);
+
+  useEffect(() => {
+    const fetchOficinas = async () => {
+      try {
+        const response = await FetchApi({
+          path: '/Oficina/listado',
+          method: 'GET',
+          requiresAuth: true,
+          token: token || undefined
+        });
+        
+        if (response.code === 200) {
+          setOficinas(response.data);
+        } else {
+          console.error('Error al traer oficinas:', response.message);
+        }
+      } catch (error) {
+        console.error('Error al cargar oficinas:', error);
+      }
+    };
+
+    fetchOficinas();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -31,6 +60,13 @@ const NewImpresora: React.FC = () => {
     }));
   };
 
+  const handleSelectChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: Number(value)
+    }));
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -115,7 +151,7 @@ const NewImpresora: React.FC = () => {
                 name="tonnerModelo"
                 value={formData.tonnerModelo}
                 onChange={handleChange}
-                required
+               
               />
             </Box>
 
@@ -126,7 +162,7 @@ const NewImpresora: React.FC = () => {
                 name="tipo"
                 value={formData.tipo}
                 onChange={handleChange}
-                required
+             
               />
             </Box>
 
@@ -137,21 +173,26 @@ const NewImpresora: React.FC = () => {
                 name="consumible"
                 value={formData.consumible}
                 onChange={handleChange}
-                required
+             
               />
             </Box>
 
-            <Box>
-              <TextField
-                fullWidth
-                label="ID de Oficina"
+            <FormControl fullWidth required>
+              <InputLabel id="oficina-label">Oficina</InputLabel>
+              <Select
+                labelId="oficina-label"
                 name="oficinaId"
-                type="number"
                 value={formData.oficinaId}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+                onChange={handleSelectChange}
+                label="Oficina"
+              >
+                {oficinas.map(oficina => (
+                  <MenuItem key={oficina.oficinaId} value={oficina.oficinaId}>
+                    {oficina.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <Box sx={{ gridColumn: { xs: '1', sm: '1 / span 2' } }}>
               <Button 

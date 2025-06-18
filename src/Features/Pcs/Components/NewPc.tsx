@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
   Container,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl
 } from '@mui/material';
 import { FetchApi } from '../../../Api/useAxios';
 import type { PC } from '../../../Types/Types';
@@ -12,6 +16,7 @@ import { useAuth } from '../../../Context/useAuth';
 
 const NewPc: React.FC = () => {
   const { token } = useAuth();
+
   const [formData, setFormData] = useState<PC>({
     nroInventario: 0,
     nroSerie: '',
@@ -26,6 +31,31 @@ const NewPc: React.FC = () => {
     oficinaId: 0
   });
 
+  const [oficinas, setOficinas] = useState<{ oficinaId: number; nombre: string }[]>([]);
+
+  useEffect(() => {
+    const fetchOficinas = async () => {
+      try {
+        const response = await FetchApi({
+          path: '/Oficina/listado',
+          method: 'GET',
+          requiresAuth: true,
+          token: token || undefined
+        });
+
+        if (response.code === 200) {
+          setOficinas(response.data);
+        } else {
+          console.error('Error al traer oficinas:', response.message);
+        }
+      } catch (error) {
+        console.error('Error al cargar oficinas:', error);
+      }
+    };
+
+    fetchOficinas();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -33,12 +63,20 @@ const NewPc: React.FC = () => {
       [name]: name === 'nroInventario' || name === 'oficinaId' ? Number(value) : value
     }));
   };
+  
+  const handleSelectChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: Number(value)
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await FetchApi<PC>({
-        path: '/pc/crear',
+        path: '/Pc/crear',
         method: 'POST',
         payload: formData,
         requiresAuth: true,
@@ -46,10 +84,22 @@ const NewPc: React.FC = () => {
       });
 
       if (response.code === 200 || response.code === 201) {
-        // Manejar éxito
         console.log('PC agregada exitosamente');
+        
+        setFormData({
+          nroInventario: 0,
+          nroSerie: '',
+          marca: '',
+          modelo: '',
+          ram: '',
+          tipoRam: '',
+          disco: '',
+          procesador: '',
+          fuente: '',
+          oficina: '',
+          oficinaId: 0
+        });
       } else {
-        // Manejar error
         console.error('Error al agregar PC:', response.message);
       }
     } catch (error) {
@@ -63,125 +113,113 @@ const NewPc: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Agregar Nueva PC
         </Typography>
-        
+
         <form onSubmit={handleSubmit}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
-            <Box>
-              <TextField
-                fullWidth
-                label="Número de Inventario"
-                name="nroInventario"
-                type="number"
-                value={formData.nroInventario}
-                onChange={handleChange}
-                required
-              />
-            </Box>
-            
-            <Box>
-              <TextField
-                fullWidth
-                label="Número de Serie"
-                name="nroSerie"
-                value={formData.nroSerie}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+              gap: 3
+            }}
+          >
+            <TextField
+              fullWidth
+              label="Número de Inventario"
+              name="nroInventario"
+              type="number"
+              value={formData.nroInventario}
+              onChange={handleChange}
+              required
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="Marca"
-                name="marca"
-                value={formData.marca}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+            <TextField
+              fullWidth
+              label="Número de Serie"
+              name="nroSerie"
+              value={formData.nroSerie}
+              onChange={handleChange}
+              required
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="Modelo"
-                name="modelo"
-                value={formData.modelo}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+            <TextField
+              fullWidth
+              label="Marca"
+              name="marca"
+              value={formData.marca}
+              onChange={handleChange}
+              required
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="RAM"
-                name="ram"
-                value={formData.ram}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+            <TextField
+              fullWidth
+              label="Modelo"
+              name="modelo"
+              value={formData.modelo}
+              onChange={handleChange}
+              required
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="Tipo de RAM"
-                name="tipoRam"
-                value={formData.tipoRam}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+            <TextField
+              fullWidth
+              label="RAM"
+              name="ram"
+              value={formData.ram}
+              onChange={handleChange}
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="Disco"
-                name="disco"
-                value={formData.disco}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+            <TextField
+              fullWidth
+              label="Tipo de RAM"
+              name="tipoRam"
+              value={formData.tipoRam}
+              onChange={handleChange}
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="Procesador"
-                name="procesador"
-                value={formData.procesador}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+            <TextField
+              fullWidth
+              label="Disco"
+              name="disco"
+              value={formData.disco}
+              onChange={handleChange}
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="Fuente"
-                name="fuente"
-                value={formData.fuente}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+            <TextField
+              fullWidth
+              label="Procesador"
+              name="procesador"
+              value={formData.procesador}
+              onChange={handleChange}
+            />
 
-            <Box>
-              <TextField
-                fullWidth
-                label="ID de Oficina"
+            <TextField
+              fullWidth
+              label="Fuente"
+              name="fuente"
+              value={formData.fuente}
+              onChange={handleChange}
+            />
+
+            <FormControl fullWidth required>
+              <InputLabel id="oficina-label">Oficina</InputLabel>
+              <Select
+                labelId="oficina-label"
                 name="oficinaId"
-                type="number"
                 value={formData.oficinaId}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+                onChange={handleSelectChange}
+                label="Oficina"
+              >
+                {oficinas.map(oficina => (
+                  <MenuItem key={oficina.oficinaId} value={oficina.oficinaId}>
+                    {oficina.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <Box sx={{ gridColumn: { xs: '1', sm: '1 / span 2' } }}>
-              <Button 
-                type="submit" 
-                variant="contained" 
+              <Button
+                type="submit"
+                variant="contained"
                 color="primary"
                 size="large"
                 fullWidth

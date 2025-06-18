@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, 
   TextField, 
   Button, 
   Typography, 
   Container,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel,
 } from '@mui/material';
 import { FetchApi } from '../../../Api/useAxios';
 import { type AireAcondicionado } from '../../../Types/Types';
@@ -24,6 +28,35 @@ const NewAire: React.FC = () => {
     oficinaId: 0
   });
 
+  const [oficinas,setOficinas]=useState<{oficinaId:number;nombre:string}[]>([]);
+ 
+  
+  useEffect(() => {
+    const fetchOficinas = async () => {
+      try {
+        const response = await FetchApi({
+          path: '/Oficina/listado',
+          method: 'GET',
+          requiresAuth: true,
+          token: token || undefined
+        });
+
+        if (response.code === 200) {
+          setOficinas(response.data);
+        } else {
+          console.error('Error al traer oficinas:', response.message);
+        }
+      } catch (error) {
+        console.error('Error al cargar oficinas:', error);
+      }
+    };
+
+    fetchOficinas();
+  }, []);
+  
+
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -31,6 +64,15 @@ const NewAire: React.FC = () => {
       [name]: name === 'nroInventario' || name === 'oficinaId' ? Number(value) : value
     }));
   };
+  
+  
+  const handleSelectChange=(e:any)=>{
+    const {name,value}=e.target;
+    setFormData(prev=>({
+      ...prev,
+      [name]:Number(value)
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +158,7 @@ const NewAire: React.FC = () => {
                 name="frigorias"
                 value={formData.frigorias}
                 onChange={handleChange}
-                required
+                
               />
             </Box>
 
@@ -127,7 +169,7 @@ const NewAire: React.FC = () => {
                 name="potencia"
                 value={formData.potencia}
                 onChange={handleChange}
-                required
+     
               />
             </Box>
 
@@ -142,17 +184,23 @@ const NewAire: React.FC = () => {
               />
             </Box>
 
-            <Box>
-              <TextField
-                fullWidth
-                label="ID de Oficina"
+
+            <FormControl fullWidth required>
+              <InputLabel id="oficina-label">Oficina</InputLabel>
+              <Select
+                labelId="oficina-label"
                 name="oficinaId"
-                type="number"
                 value={formData.oficinaId}
-                onChange={handleChange}
-                required
-              />
-            </Box>
+                onChange={handleSelectChange}
+                label="Oficina"
+              >
+                {oficinas.map(oficina => (
+                  <MenuItem key={oficina.oficinaId} value={oficina.oficinaId}>
+                    {oficina.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <Box sx={{ gridColumn: { xs: '1', sm: '1 / span 2' } }}>
               <Button 

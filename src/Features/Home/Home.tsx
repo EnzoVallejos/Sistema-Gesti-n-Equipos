@@ -9,19 +9,21 @@ const Home: React.FC = () => {
   return (
     <Box sx={{ 
       display: 'flex',
-      flexDirection: 'row',
-      gap: 4,
+      flexDirection: { xs: 'column', md: 'row' },
+      gap: { xs: 2, md: 4 },
       justifyContent: 'center',
       alignItems: 'center',
-      minHeight: '80vh'
+      minHeight: '80vh',
+      padding: { xs: 2, md: 0 }
     }}>
       <Button 
         variant="contained" 
         size="large"
         sx={{ 
-          fontSize: '1.5rem',
-          padding: '20px 40px',
-          minWidth: '300px',
+          fontSize: { xs: '1.2rem', md: '1.5rem' },
+          padding: { xs: '15px 30px', md: '20px 40px' },
+          minWidth: { xs: '250px', md: '300px' },
+          width: { xs: '100%', md: 'auto' },
           backgroundColor: '#1976d2',
           '&:hover': {
             backgroundColor: '#1565c0'
@@ -36,9 +38,10 @@ const Home: React.FC = () => {
         variant="contained" 
         size="large"
         sx={{ 
-          fontSize: '1.5rem',
-          padding: '20px 40px',
-          minWidth: '300px',
+          fontSize: { xs: '1.2rem', md: '1.5rem' },
+          padding: { xs: '15px 30px', md: '20px 40px' },
+          minWidth: { xs: '250px', md: '300px' },
+          width: { xs: '100%', md: 'auto' },
           backgroundColor: '#1976d2',
           '&:hover': {
             backgroundColor: '#1565c0'
@@ -52,15 +55,19 @@ const Home: React.FC = () => {
         variant="contained"
         size="large"
         sx={{
-          fontSize: '1.5rem',
-          padding: '20px 40px',
-          minWidth: '300px',
+          fontSize: { xs: '1.2rem', md: '1.5rem' },
+          padding: { xs: '15px 30px', md: '20px 40px' },
+          minWidth: { xs: '250px', md: '300px' },
+          width: { xs: '100%', md: 'auto' },
+          backgroundColor: '#1976d2',
+          '&:hover': {
+            backgroundColor: '#1565c0'
+          }
         }}
         onClick={() => navigate(BrowserRoutes.UPLOAD_FILES)}
       >
         Cargar Excel
       </Button>
-      
     </Box>
   );
 };
